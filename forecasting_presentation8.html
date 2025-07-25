@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecasting Monitoring Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c5282, #3182ce);
+            color: white;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            text-align: center;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            color: #fed7aa;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #fed7aa;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide img {
+            max-width: 80%;
+            max-height: 60%;
+            border: 3px solid #f97316;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .contact-info {
+            text-align: left;
+            font-size: 1.3rem;
+            line-height: 1.8;
+        }
+
+        .contact-info ul {
+            margin-top: 20px;
+            margin-left: 40px;
+        }
+
+        .contact-info li {
+            margin-bottom: 15px;
+        }
+
+        .contact-info .email {
+            color: #fed7aa;
+            font-weight: bold;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .nav-btn:hover {
+            background: #ea580c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+        }
+
+        .nav-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            color: #fed7aa;
+        }
+
+        /* Animation styles for animated slides */
+        .slide-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            transition: all 1s ease-in-out;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            transition: transform 2s ease-out;
+        }
+
+        .image-container.centered {
+            transform: translateX(0);
+        }
+
+        .image-container.shifted {
+            transform: translateX(-2%);
+        }
+
+        /* Ensure images maintain consistent size and don't change */
+        .image-container img {
+            max-width: 80%;
+            max-height: 60vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* Header animation for animated slides */
+        .animated-slide h2 {
+            transition: all 2s ease-out;
+        }
+
+        .animated-slide h2.moved-up {
+            transform: translateY(-20px);
+        }
+
+        /* Special styling for text-only slides (like slide 2) */
+        .text-only-slide .description-container {
+            width: 80%;
+            max-width: 800px;
+            position: static;
+            opacity: 1;
+            transform: none;
+            display: block;
+            margin: 0 auto;
+            margin-top: 10px;
+        }
+
+        .text-only-slide .description-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #ffffff;
+        }
+
+        .text-only-slide h2 {
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+        }
+
+        /* Animation for "however" text */
+        .however-text {
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+        }
+
+        .however-text.animate {
+            opacity: 1;
+            transform: translateX(0);
+        }
+            width: 30%;
+            max-width: 350px;
+            text-align: left;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            display: none;
+        }
+
+        .description-container.visible {
+            opacity: 1;
+            transform: translateX(0);
+            display: block;
+        }
+
+        .description-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #ffffff;
+        }
+
+        .description-text ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .description-text li {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+        }
+
+        .description-text li.animate {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .description-text li:before {
+            content: "•";
+            color: #f97316;
+            font-size: 1.6rem;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+
+        .description-text .bold {
+            font-weight: bold;
+        }
+
+        /* Image placeholder styling for when images don't load */
+        .image-placeholder {
+            width: 80%;
+            height: 400px;
+            background: linear-gradient(45deg, #374151, #4b5563);
+            border: 3px solid #f97316;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #fed7aa;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="current-slide">1</span> / <span id="total-slides">10</span>
+        </div>
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>Forecasting Monitoring Tools</h1>
+        </div>
+
+        <!-- Slide 2: Current limitations -->
+        <div class="slide text-only-slide animated-slide">
+            <h2>Current limitations</h2>
+            <div class="description-container">
+                <div class="description-text">
+                    <ul>
+                        <li>at the moment we use Grafana for the visualization of our monitored forecasting data</li>
+                    </ul>
+                    <div class="however-text" style="text-align: center; font-size: 1.4rem; margin: 20px 0; color: #ffffff;">however</div>
+                    <ul>
+                        <li>Grafana is not an ideal tool as it cannot handle the full data - therefore it only gives us an <span class="bold">indication</span> of the situation and <span class="bold">not the full picture</span></li>
+                        <li>it is only the first iteration of our forecasting monitoring initiative and further improvements are planned</li>
+                        <li>for now when we require detailed data for debugging we use Athena which should be more utilized in the future as well</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Audience Impressions -->
+        <div class="slide animated-slide">
+            <h2>Audience Impressions</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 1.png" alt="Audience Impressions Dashboard" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Audience Impressions Dashboard</strong><br><br>
+                            Place your first screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 1.png"</span><br><br>
+                            Shows: Total vs Forecasted Impressions over time<br>
+                            Current: 74.4M vs 71.6M impressions
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>a periodical forecast ran daily at 3 AM</li>
+                            <li>a comparison of our <span class="bold">total forecasted impressions</span> and the <span class="bold">real reported impressions</span> per day</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Campaign percentage error -->
+        <div class="slide animated-slide">
+            <h2>Campaign percentage error</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 6.png" alt="Campaign Percentage Error Dashboard" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Campaign Percentage Error Dashboard</strong><br><br>
+                            Place your sixth screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 6.png"</span><br><br>
+                            Shows: Campaign percentage error metrics and analysis
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>the percentage error signifies how far away our forecasted impressions were from the real reported impressions <span class="bold">for a particular campaign</span></li>
+                            <li>if it is 19% and we expected 100 impressions, the real reported impressions were either 119 or 81</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Correlation coefficient -->
+        <div class="slide animated-slide">
+            <h2>Correlation coefficient</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 7.png" alt="Correlation Coefficient Dashboard" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Correlation Coefficient Dashboard</strong><br><br>
+                            Place your seventh screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 7.png"</span><br><br>
+                            Shows: Correlation coefficient metrics and analysis
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>unlike the error percentage, the correlation coefficient compares the <span class="bold">spatial distribution</span> of the impressions</li>
+                            <li>we compare where the impressions actually took place versus where we predicted they would</li>
+                            <li>the closer to 1 the better</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Percentage Error Count -->
+        <div class="slide animated-slide">
+            <h2>Percentage Error Count</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 3.png" alt="Percentage Error Count Chart" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Percentage Error Count Chart</strong><br><br>
+                            Place your third screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 3.png"</span><br><br>
+                            Shows: Distribution of errors across campaigns<br>
+                            Most errors fall in 0-100% range
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>how many campaigns had which percentage error count</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Median Campaign Percentage Error -->
+        <div class="slide animated-slide">
+            <h2>Median Campaign Percentage Error</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 4.png" alt="Median Campaign Percentage Error Chart" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Median Campaign Percentage Error</strong><br><br>
+                            Place your fourth screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 4.png"</span><br><br>
+                            Shows: Error trends over time<br>
+                            Current: 6.14% (Last) vs 8.69% (Mean)
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>we consider data below 10% okay</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Confidence -->
+        <div class="slide animated-slide">
+            <h2>Confidence</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 2.png" alt="Confidence Dashboard" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Confidence Dashboard</strong><br><br>
+                            Place your second screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 2.png"</span><br><br>
+                            Shows: Campaign confidence levels<br>
+                            Breakdown: 9 High, 4 Medium, 2 Medium, 3 Low confidence campaigns
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>combines the error rate and correlation coefficient<br>→ the accuracy of total impressions spent and impressions spent across screens</li>
+                            <li>current limitation is that it is only compared once per day, further iterations will compare the data once every hour</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Problematic campaigns -->
+        <div class="slide animated-slide">
+            <h2>Problematic campaigns</h2>
+            <div class="slide-content">
+                <div class="image-container centered">
+                    <img src="Image 5.png" alt="Problematic Campaigns Dashboard" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <div>
+                            <strong>Problematic Campaigns Dashboard</strong><br><br>
+                            Place your fifth screenshot here as <span style="font-family:monospace; color:#f97316;">"Image 5.png"</span><br><br>
+                            Shows: High error & low correlation campaigns<br>
+                            Left: High percentage errors | Right: Low correlations
+                        </div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <div class="description-text">
+                        <ul>
+                            <li>currently does not show all problematic campaigns due to Grafana limitations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Contact -->
+        <div class="slide">
+            <h2>In case of further questions</h2>
+            <div class="contact-info">
+                <ul>
+                    <li>Please contact our PMs via Slack or email
+                        <ul style="margin-top: 15px;">
+                            <li>Dominik Schramek @ <span class="email">dominik.schramek@stroeer.de</span></li>
+                            <li>Marketa Marcalikova @ <span class="email">marketa.marcalikova@stroeer.de</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            
+            // Handle animations for slides with animated-slide class
+            const currentSlideElement = slides[currentSlide];
+            if (currentSlideElement.classList.contains('animated-slide')) {
+                
+                // Check if it's a text-only slide
+                if (currentSlideElement.classList.contains('text-only-slide')) {
+                    const description = currentSlideElement.querySelector('.description-container');
+                    const header = currentSlideElement.querySelector('h2');
+                    const firstListItems = description ? description.querySelectorAll('ul:first-child li') : [];
+                    const howeverText = description ? description.querySelector('.however-text') : null;
+                    const secondListItems = description ? description.querySelectorAll('ul:last-child li') : [];
+                    
+                    if (description && header) {
+                        // Reset all elements
+                        firstListItems.forEach(item => item.classList.remove('animate'));
+                        if (howeverText) howeverText.classList.remove('animate');
+                        secondListItems.forEach(item => item.classList.remove('animate'));
+                        
+                        // Move header up after 1 second
+                        setTimeout(() => {
+                            header.classList.add('moved-up');
+                        }, 1000);
+                        
+                        let delay = 2000; // Start after 2 seconds
+                        
+                        // Animate first bullet point
+                        if (firstListItems.length > 0) {
+                            setTimeout(() => {
+                                firstListItems[0].classList.add('animate');
+                            }, delay);
+                            delay += 800;
+                        }
+                        
+                        // Animate "however" text
+                        if (howeverText) {
+                            setTimeout(() => {
+                                howeverText.classList.add('animate');
+                            }, delay);
+                            delay += 800;
+                        }
+                        
+                        // Animate remaining bullet points
+                        secondListItems.forEach((item, index) => {
+                            setTimeout(() => {
+                                item.classList.add('animate');
+                            }, delay + (index * 800));
+                        });
+                    }
+                } else {
+                    // Handle regular animated slides with images
+                    const imageContainer = currentSlideElement.querySelector('.image-container');
+                    const description = currentSlideElement.querySelector('.description-container');
+                    const header = currentSlideElement.querySelector('h2');
+                    const listItems = description ? description.querySelectorAll('li') : [];
+                    
+                    if (imageContainer && description && header) {
+                        // Start with image centered and description hidden
+                        imageContainer.classList.add('centered');
+                        imageContainer.classList.remove('shifted');
+                        description.classList.remove('visible');
+                        header.classList.remove('moved-up');
+                        
+                        // Reset all list items
+                        listItems.forEach(item => {
+                            item.classList.remove('animate');
+                        });
+                        
+                        // Move header up and image to left after 1 second
+                        setTimeout(() => {
+                            header.classList.add('moved-up');
+                            imageContainer.classList.remove('centered');
+                            imageContainer.classList.add('shifted');
+                        }, 1000);
+                        
+                        // Show description container after 2 seconds
+                        setTimeout(() => {
+                            description.classList.add('visible');
+                            
+                            // Animate each list item with delays - start 1 second after container shows
+                            setTimeout(() => {
+                                listItems.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        item.classList.add('animate');
+                                    }, index * 600); // 600ms delay between each item
+                                });
+                            }, 1000); // 1 second delay before first bullet starts
+                        }, 2000);
+                    }
+                }
+            }
+        }
+
+        function changeSlide(n) {
+            if (currentSlide + n >= 0 && currentSlide + n < totalSlides) {
+                showSlide(currentSlide + n);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
